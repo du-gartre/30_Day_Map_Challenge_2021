@@ -7,6 +7,7 @@
 #' 
 #' Por:
 #'  David Garibay
+#'  Karen Santoyo
 
 
 # Importar librerías ------------------------------------------------------
@@ -97,10 +98,10 @@ lft_esquites <- leaflet(data = shp_datos,
             title = "Nombre de esquites")
 
 
-m = mapview(lft_esquites)
 
+# Guardar mapa como PNG ---------------------------------------------------
+# https://r-spatial.github.io/mapview/reference/mapshot.html
 mapshot(lft_esquites, file = "figs/mapa_esquites.png")
 
-mapshot(lft_esquites, file = paste0(getwd(), "figs/mapa_esquites.png"))
 
 
