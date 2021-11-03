@@ -67,6 +67,8 @@ pal_fac <- colorFactor(palette = "Set2",
                        domain = shp_datos$Nombre)
 
 ## pop-up ----
+# Son los mensajes que aparecen cuando damos click a alguno de los
+# estados
 popup <-  paste0(
   "<b>", "Estado: ", "</b>", as.character(shp_datos$NOMGEO), "<br>",
   "<b>", "Nombre: ", "</b>", as.character(shp_datos$Nombre), "<br>")
@@ -99,9 +101,13 @@ lft_esquites <- leaflet(data = shp_datos,
 
 
 
-# Guardar mapa como PNG ---------------------------------------------------
+# Guardar mapa  ---------------------------------------------------
+## como PNG ----
 # https://r-spatial.github.io/mapview/reference/mapshot.html
 mapshot(lft_esquites, file = "figs/mapa_esquites.png")
+
+## Como HTML ----
+htmlwidgets::saveWidget(lft_esquites, "figs/mapa_esquites.html")
 
 
 
