@@ -1,0 +1,28 @@
+{
+    "id": "36DCC04A",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1635899880257.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "id": "93ee33897a0a41bb94e71d2c5a28e70e",
+        "name": "shp_ent",
+        "title": "shp_ent",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 3905800885676039468,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1635899880257,
+    "read_only": false,
+    "read_only_alternatives": []
+}
