@@ -1,0 +1,127 @@
+#' Día 3: Polígonos 
+#' Canciones más escuchadas por país en América
+#' 
+#' 30 Day map Challenge (Noviembre, 2021)
+#' México
+#' 
+#' Por:
+#'  Karen Santoyo
+#'  David Garibay
+
+
+# Importar librerías ------------------------------------------------------
+# install.packages("sf")
+# install.packages("leaflet")
+# install.packages("dplyr")
+# install.packages("mapview")
+# install.packages("RColorBrewer")
+# webshot::install_phantomjs()
+
+library(sf)      # para leer mapas
+library(leaflet) # para crear mapas
+library(dplyr)
+library(mapview) # para guardar leaflet en png o jpg
+library(RColorBrewer)
+
+# Importar datos ----------------------------------------------------------
+
+## Base con nombres de canciones por país ----
+#' Esta base fue creada manualmente a partir de la información de:
+#' https://spotifycharts.com/regional
+#' Filtramos por país, a nivel semanal, con fecha 10/28/2021
+df_america <- read.csv("data/américa_final.csv")
+View(df_america)
+
+## Shapefile a nivel país, América ----
+#' Este mapa fue obtenido de 
+#'  https://tapiquen-sig.jimdofree.com/english-version/free-downloads/americas/
+#'  En QGIS se le removieron los países que no pertenecen a América
+#'  para quedarnos con un total de 35 países
+
+shp_america <- st_read("data/Americas_35.shp") %>% 
+    arrange(COUNTRY)
+
+# Renombramos columna de países
+shp_america$COUNTRY <- c('Antigua and Barbuda', 'Argentina', 'Bahamas', 
+                         'Barbados', 'Belice', 'Bolivia', 'Brasil', 'Canadá', 
+                         'Chile', 'Colombia', 'Costa Rica', 'Cuba', 'Dominica', 
+                         'República Dominicana', 'Ecuador', 'El Salvador', 
+                         'Granada', 'Guatemala', 'Guyana', 'Haití', 'Honduras', 
+                         'Jamaica', 'México', 'Nicaragua', 'Panamá', 'Paraguay', 
+                         'Perú', 'San Cristóbal y Nieves', 'Santa Lucía', 
+                         'San Vincente y las Granadinas', 'Surinam', 
+                         'Trinidad y Tobago', 'Estados Unidos', 
+                         'Uruguay', 'Venezuela')
+
+
+# Manipulación de datos ---------------------------------------------------
+
+## Unimos las bases de datos ----
+shp_datos <- merge(x = shp_america, 
+                   y = df_america,  
+                   by.x = "COUNTRY", 
+                   by.y = "País", 
+                   all.x = TRUE)
+
+unique(shp_datos$Género)
+sort(table(shp_datos$Género))
+
+## Creamos variables categóricas (factors) ----
+shp_datos$Género <- factor(x = shp_datos$Género, 
+                           levels = c("Pop", "Reguetón", 
+                                      "Urbano", "Hip-Hop", 
+                                      "Forró"))
+
+unique(shp_datos$Género)
+
+# Creación del mapa -------------------------------------------------------
+## Paleta de colores ----
+# palette_rev <- rev(brewer.pal(8, "Dark2")) # Para revertir el orden de la pal
+pal_fac <- colorFactor(palette = "Spectral", 
+                       domain = shp_datos$Género)
+
+## pop-up ----
+# Son los mensajes que aparecen cuando damos click a alguno de los
+# estados
+popup <-  paste0(
+  "<b>", "País: ", "</b>", as.character(shp_datos$COUNTRY), "<br>",
+  "<b>", "Canción: ", "</b>", as.character(shp_datos$Canción), "<br>",
+  "<b>", "Artista: ", "</b>", as.character(shp_datos$Artista), "<br>",
+  "<b>", "Género: ", "</b>", as.character(shp_datos$Género), "<br>")
+
+
+## Leaflet (interactivo) ----
+# En este caso es interactivo, seguí el tutorial de 
+# Juvenal Campos:
+# https://juvenalcampos.com/2020/01/13/tutorial-de-mapas-en-leaflet/
+lft_genero <- leaflet(data = shp_datos, 
+        options = leafletOptions(zoomControl = FALSE)) %>%
+  addProviderTiles("Stamen.Watercolor") %>%
+  addPolygons(color = "#444444", # Color de los bordes
+              fillColor = ~pal_fac(shp_datos$Género),  # Relleno de estados 
+              layerId = ~shp_datos$COUNTRY,
+              opacity = 1, # Opacidad de los bordes
+              smoothFactor = 0.5, 
+              weight = 1, # Grosor de los bordes
+              fillOpacity = 0.7,
+              highlightOptions = highlightOptions(color = "white", 
+                                                  weight = 2, 
+                                                  bringToFront = TRUE),
+              label = ~shp_datos$Género, 
+              labelOptions = labelOptions(direction = "auto"), 
+              popup = popup) %>% 
+  addLegend(position = "bottomleft", 
+            pal = pal_fac, 
+            values = ~shp_datos$Género, 
+            title = "Géneros más oídos en Spotify <br> última semana de Octubre (2021)")
+
+# Guardar mapa  ---------------------------------------------------
+## como PNG ----
+# https://r-spatial.github.io/mapview/reference/mapshot.html
+mapshot(lft_genero, file = "figs/mapa_genero.png")
+
+## Como HTML ----
+htmlwidgets::saveWidget(lft_genero, "figs/mapa_genero.html")
+
+
+
